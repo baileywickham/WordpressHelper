@@ -21,8 +21,4 @@ RUN apt-get install -y -qqq \
     sudo
 
 USER user
-#ENTRYPOINT ./personal_packages.sh -a
-
-#COPY /etc/apt/sources.list /etc/apt/sources.list
-
 
