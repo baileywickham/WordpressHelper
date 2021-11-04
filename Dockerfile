@@ -17,6 +17,7 @@ RUN apt-get update -qqq > /dev/null && apt-get install -y -qqq \
     git \
     sudo
 
+#cache packages out of laziness
 RUN apt-get install -y -qqq apt-utils \
         apache2 \
         ghostscript \

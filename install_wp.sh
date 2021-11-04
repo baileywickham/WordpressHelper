@@ -5,8 +5,10 @@ if [ -f utils.sh ]; then
 else
     curl https://raw.githubusercontent.com/baileywickham/personal_packages/master/utils.sh > utils.sh
 fi
+#https://api.wordpress.org/secret-key/1.1/salt/
 
-source vars.sh
+wp_parent_directory=/var/www/
+wp_directory=/var/www/wordpress
 
 wp_url=""
 db_password=""
@@ -61,7 +63,7 @@ function configure_apache() {
     <VirtualHost *:80>
     $(get_servername)
     DocumentRoot ${wp_directory}
-    <Directory ${wp_directory}
+    <Directory /srv/www/wordpress>
         Options FollowSymLinks
         AllowOverride Limit Options FileInfo
         DirectoryIndex index.php
