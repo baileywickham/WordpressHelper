@@ -88,7 +88,7 @@ function create_db () {
     task "Creating DB"
     cat << EOF |
     CREATE DATABASE wordpress;
-    CREATE USER wordpress@localhost IDENTIFIED BY $db_password;
+    CREATE USER wordpress@localhost IDENTIFIED BY '$db_password';
     GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON wordpress.* TO wordpress@localhost;
     FLUSH PRIVILEGES;
     quit;

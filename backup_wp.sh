@@ -14,7 +14,7 @@ function backup_db() {
     task "Back up db"
     db_name="${wp_site_name}_${time}.sql.gz"
 
-    with_sudo mysqldump -u wordpress -p wordpress | gzip > $db_name
+    mysqldump -u root -p wordpress | gzip > $db_name
     with_sudo mv $db_name ${wp_directory}/${db_name}
 }
 
