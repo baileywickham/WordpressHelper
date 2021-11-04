@@ -14,6 +14,6 @@ Install my least favorite toolset
 ### Install wordpress
 ```bash
 sudo apt install git
-git clone git@github.com:baileywickham/WordpressHelper.git
+git clone https://github.com/baileywickham/WordpressHelper.git
 ./install_wp --install
 ```
