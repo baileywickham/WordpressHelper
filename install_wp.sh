@@ -4,6 +4,7 @@ if [ -f utils.sh ]; then
     source utils.sh
 else
     curl https://raw.githubusercontent.com/baileywickham/personal_packages/master/utils.sh > utils.sh
+    source utils.sh
 fi
 #https://api.wordpress.org/secret-key/1.1/salt/
 
@@ -79,6 +80,7 @@ EOF
 with_sudo mv tmpfile /etc/apache2/sites-available/wordpress.conf
 
 with_sudo a2ensite wordpress
+with_sudo a2dissite 000-default
 with_sudo a2enmod rewrite
 with_sudo service apache2 restart
 
@@ -91,9 +93,9 @@ function create_db () {
     CREATE USER wordpress@localhost IDENTIFIED BY '$db_password';
     GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON wordpress.* TO wordpress@localhost;
     FLUSH PRIVILEGES;
-    quit;
 EOF
-sudo mysql -u root -
+
+with_sudo mysql -u root
 
 }
 
