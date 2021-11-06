@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
-
 if [ -f utils.sh ]; then
     source utils.sh
 else
-    curl https://raw.githubusercontent.com/baileywickham/personal_packages/master/utils.sh > utils.sh
+    curl -s https://raw.githubusercontent.com/baileywickham/personal_packages/master/utils.sh > utils.sh
     source utils.sh
 fi
+
+function help() {
+    echo "use --install to install"
+    echo "use --restore <filename> to restore from a backup. Wipes server"
+}
+
+if [[ $# -le 0 ]]; then
+    help
+fi
+
 #https://api.wordpress.org/secret-key/1.1/salt/
+source vars.sh
+
+set -uo pipefail
 
 wp_parent_directory=/var/www/
 wp_directory=/var/www/wordpress
@@ -46,7 +58,7 @@ function install_wp_packages () {
 function download_wp () {
     task "Downloading wp"
     with_sudo chown www-data: $wp_parent_directory
-    curl https://wordpress.org/latest.tar.gz | with_sudo tar zx -C $wp_parent_directory
+    curl -s https://wordpress.org/latest.tar.gz | with_sudo tar zx -C $wp_parent_directory
     with_sudo chown -R www-data $wp_directory
 }
 
@@ -102,19 +114,29 @@ with_sudo mysql -u root
 
 function create_wp_config () {
     task "Creating wp-config"
-    cwd=$(pwd)
-    cd $wp_directory
-    with_sudo cp wp-config-sample.php wp-config.php
-    with_sudo chown www-data wp-config.php
-    with_sudo sed -i 's/database_name_here/wordpress/' ${wp_directory}/wp-config.php
-    with_sudo sed -i 's/username_here/wordpress/' ${wp_directory}/wp-config.php
-    with_sudo sed -i 's/password_here/'${db_password}'/' ${wp_directory}/wp-config.php
+    cat << EOF |
+     # Block WordPress xmlrpc.php requests
+    <Files xmlrpc.php>
+    order deny,allow
+    deny from all
+    </Files>
+EOF
+sudo tee ${wp_directory}/.htaccess > /dev/null
 
-    curl https://api.wordpress.org/secret-key/1.1/salt/ | sudo tee -a ${wp_directory}/wp-config.php > /dev/null
-    cd $cwd
+cwd=$(pwd)
+cd $wp_directory
+with_sudo cp wp-config-sample.php wp-config.php
+with_sudo chown www-data wp-config.php
+with_sudo sed -i 's/database_name_here/wordpress/' ${wp_directory}/wp-config.php
+with_sudo sed -i 's/username_here/wordpress/' ${wp_directory}/wp-config.php
+with_sudo sed -i 's/password_here/'${db_password}'/' ${wp_directory}/wp-config.php
+
+curl -s https://api.wordpress.org/secret-key/1.1/salt/ | sudo tee -a ${wp_directory}/wp-config.php > /dev/null
+cd $cwd
 }
 
-function main () {
+
+function install_site () {
     task "Main"
     install_wp_packages
     configure_apache
@@ -125,10 +147,51 @@ function main () {
     create_db
 }
 
-if [[ $1 == "--install" ]]; then
-    main
-else
-    echo "use --install to install"
-    echo -n
-fi
+function delete_current_db () {
+    task "Deleting current db"
+    cat << EOF |
+    DROP DATABASE IF EXISTS wordpress;
+    DROP USER IF EXISTS wordpress@localhost;
+EOF
 
+with_sudo mysql -u root
+}
+
+function unpack_backup () {
+    task "Unpacking backup"
+    with_sudo tar -zxf $backup_file -C ${wp_parent_directory} --directory $(basename ${wp_directory})
+    with_sudo chown www-data: $wp_parent_directory
+}
+
+function restore_site () {
+    task "Restoring wp install"
+    with_sudo rm -rf ${wp_directory}
+    delete_current_db
+    install_site
+    unpack_backup
+}
+
+
+while [[ $# -gt 0 && ${1} ]]; do
+    case "${1}" in
+        --install)
+            install_site
+            break;
+            ;;
+
+        --restore)
+            if [[ $# -ne 2 ]]; then
+                echo "backup requires a backup file"
+                exit 1
+            fi
+            backup_file=${2}
+            restore_site
+            shift
+            break;
+            ;;
+        *)
+            help
+            break
+            ;;
+    esac
+done

@@ -1,19 +1,35 @@
 # WordpressHelper
 Install my least favorite toolset
 
-
 ## TODO
+* [x] add backup
+* [x] add restore
 * [x] install shell
-* [ ] fail2ban
-* [ ] block xmlrpc
+* [x] fail2ban
+* [x] block xmlrpc
 * [ ] enable automated updates
 * [ ] ufw firewall, block ports besides 22, 80, 443
 * [ ] certbot
 
 ## Use
-### Install wordpress
+### Clone
 ```bash
 sudo apt install git
 git clone https://github.com/baileywickham/WordpressHelper.git
-./install_wp --install
+```
+
+### Install wordpress
+```bash
+./install_wp.sh --install
+```
+
+
+### Backup wordpress
+```bash
+./backup_wp.sh --backup
+```
+
+### Restore wordpress
+```bash
+./install_wp.sh --restore <filename>
 ```

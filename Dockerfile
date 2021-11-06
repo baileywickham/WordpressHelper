@@ -17,6 +17,10 @@ RUN apt-get update -qqq > /dev/null && apt-get install -y -qqq \
     git \
     sudo
 
+RUN mkdir /var/run/mysqld
+
+
+
 #cache packages out of laziness
 RUN apt-get install -y -qqq apt-utils \
         apache2 \
@@ -32,19 +36,21 @@ RUN apt-get install -y -qqq apt-utils \
         php-mbstring \
         php-mysql \
         php-xml \
-        php-zip
+        php-zip \
+        fail2ban
 
+RUN chown mysql:mysql /var/run/mysqld
 
-FROM builder AS final
-COPY . /home/user
 WORKDIR /home/user
 RUN chown -R user /home/user
 RUN adduser www-data sudo
 RUN adduser user sudo
 
-
 RUN echo "%sudo ALL=NOPASSWD: ALL" >> /etc/sudoers
 
+FROM builder AS final
+
+COPY . /home/user
 USER user
 
-
+CMD sudo service mysql start & bash
