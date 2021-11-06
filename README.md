@@ -7,9 +7,9 @@ Install my least favorite toolset
 * [x] install shell
 * [x] fail2ban
 * [x] block xmlrpc
-* [ ] enable automated updates
+* [x] enable automated updates
 * [ ] ufw firewall, block ports besides 22, 80, 443
-* [ ] certbot
+* [x] certbot
 
 ## Use
 ### Clone

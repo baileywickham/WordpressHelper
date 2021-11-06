@@ -23,6 +23,7 @@ RUN mkdir /var/run/mysqld
 
 #cache packages out of laziness
 RUN apt-get install -y -qqq apt-utils \
+        software-properties-common \
         apache2 \
         ghostscript \
         libapache2-mod-php \
@@ -53,4 +54,4 @@ FROM builder AS final
 COPY . /home/user
 USER user
 
-CMD sudo service mysql start & bash
+CMD sudo service mysql start > /dev/null 2>&1 & bash

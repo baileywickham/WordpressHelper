@@ -23,7 +23,6 @@ set -uo pipefail
 wp_parent_directory=/var/www/
 wp_directory=/var/www/wordpress
 
-wp_url=""
 db_password=""
 
 function generate_password () {
@@ -34,8 +33,8 @@ function generate_password () {
 
 function install_wp_packages () {
     task "Installing packages"
-    apt_update
     apt_install apt-utils \
+        software-properties-common \
         apache2 \
         ghostscript \
         libapache2-mod-php \
@@ -50,7 +49,8 @@ function install_wp_packages () {
         php-mysql \
         php-xml \
         php-zip \
-        fail2ban
+        fail2ban \
+        unattended-upgrades
 
     echo -n
 }
@@ -147,6 +147,26 @@ function install_site () {
     create_db
 }
 
+function install_certbot() {
+    task "Installing certbot"
+    apt_install python3 python3-venv libaugeas0
+
+    sub "Create venv"
+    with_sudo python3 -m venv /opt/certbot/
+    sub "Install packages"
+    with_sudo /opt/certbot/bin/pip install wheel
+    with_sudo /opt/certbot/bin/pip install certbot certbot-apache
+    with_sudo /opt/certbot/bin/pip install --upgrade pip
+    sub "Linking bin"
+    with_sudo ln -s /opt/certbot/bin/certbot /usr/bin/certbot
+}
+
+function run_certbot() {
+    if [ ! -z $wp_domain ]; then
+        with_sudo certbot -n --apache --agree-tos --email "baileywickham@gmail.com" -d $wp_domain
+    fi
+}
+
 function delete_current_db () {
     task "Deleting current db"
     cat << EOF |
@@ -182,18 +202,21 @@ while [[ $# -gt 0 && ${1} ]]; do
     case "${1}" in
         --install)
             install_site
-            break;
+            shift
             ;;
 
         --restore)
-            if [[ $# -ne 2 ]]; then
+            if [[ $# -le 1 ]]; then
                 echo "backup requires a backup file"
                 exit 1
             fi
             backup_file=${2}
             restore_site
-            shift
-            break;
+            shift 2
+            ;;
+        --certbot)
+            install_certbot
+            run_certbot
             ;;
         *)
             help
