@@ -8,13 +8,15 @@ fi
 
 source vars.sh
 
+set -uo pipefail
+
 time=$(date +%Y-%m-%d_%H-%M-%S)
 
 function backup_db() {
     task "Back up db"
     db_name="${wp_site_name}_${time}.sql.gz"
 
-    mysqldump -u root -p wordpress | gzip > $db_name
+    mysqldump -u root wordpress | gzip > $db_name
     with_sudo mv $db_name ${wp_directory}/${db_name}
 }
 
@@ -24,7 +26,8 @@ function backup_wp() {
 }
 
 function backup_site() {
-    backup_db && backup_site
+    backup_db
+    backup_wp
 }
 
 if [[ $1 == "--backup" ]]; then
@@ -32,5 +35,4 @@ if [[ $1 == "--backup" ]]; then
 else
     echo "use --backup to backup"
     echo -n
-    exit 1
 fi

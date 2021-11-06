@@ -37,7 +37,8 @@ function install_wp_packages () {
         php-mbstring \
         php-mysql \
         php-xml \
-        php-zip
+        php-zip \
+        fail2ban
 
     echo -n
 }
@@ -129,6 +130,5 @@ if [[ $1 == "--install" ]]; then
 else
     echo "use --install to install"
     echo -n
-    exit 1
 fi
 
