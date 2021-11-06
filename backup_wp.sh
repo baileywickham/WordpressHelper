@@ -30,7 +30,7 @@ function backup_site() {
     backup_wp
 }
 
-if [[ $1 == "--backup" ]]; then
+if [[ $# -eq 1 && $1 == "--backup" ]]; then
     backup_site
 else
     echo "use --backup to backup"
