@@ -163,6 +163,12 @@ function unpack_backup () {
     with_sudo chown www-data: $wp_parent_directory
 }
 
+function restore_db() {
+    local filename="$wp_directory/$(basename ${backup_file%.*}).sql.gz"
+    unzip < $filename | with_sudo mysql -u root wordpress
+
+}
+
 function restore_site () {
     task "Restoring wp install"
     with_sudo rm -rf ${wp_directory}
