@@ -28,7 +28,7 @@ db_password=""
 function generate_password () {
     task "Generating pw"
     db_password=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-12} | tr -d \n)
-    echo "db_password: $db_password" > $HOME/db_password
+    echo "db_password=\"$db_password\"" > $HOME/db_password
 }
 
 function install_wp_packages () {
