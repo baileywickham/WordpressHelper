@@ -33,6 +33,7 @@ function backup_wp() {
 }
 
 function backup_site() {
+    with_sudo cp /etc/apache2/sites-available/wordpress.conf ${wp_directory}/wordpress.conf
     backup_db
     backup_wp
 }

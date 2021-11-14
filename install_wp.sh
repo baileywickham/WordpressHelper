@@ -181,6 +181,7 @@ function unpack_backup () {
     task "Unpacking backup"
     with_sudo tar -zxf $backup_file -C ${wp_parent_directory} --directory $(basename ${wp_directory})
     with_sudo chown www-data: $wp_parent_directory
+    with_sudo mv ${wp_directory}/wordpress.conf /etc/apache2/sites-available/wordpress.conf
 }
 
 function restore_db() {
